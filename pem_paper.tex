@@ -1,0 +1,83 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=1.0in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\title{Partitioned Element Methods for Non-linear Computational Solid Mechanics}
+\author{B. D. Giffin}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\abstract{A generalized computational framework for a class of polytopal finite element methods is proposed, leveraging a geometric partitioning of the element domain for the sake of establishing a consistent quadrature scheme. Conventional polytopal element methods either seek to define a set of finite element shape functions explicitly, or implicitly. In the former case, the resulting shape functions are generally non-polynomial in form, leading to inconsistencies in the resulting integration of weak form integrals. In the latter case, only the low-order deformation response of the element can be integrated (via effective mean quadrature over the entire element), necessitating the introduction of artificial stabilization. In the present approach, shape functions are defined in an approximate sense over the element partition to help facilitate integration consistency and stability.}
+
+\section{Introduction}
+
+\section{Weak approximations to the element shape functions}
+
+Consider a polyhedral element $\Omega$ which has been partitioned into a collection of polyhedral cells $\omega \subset \Omega$, and suppose that each cell is bounded by a collection of polygonal facets $\sigma \subset \partial \omega$. Let the value of a given function $u$ be defined independently on the boundary of each cell and its interior, such that
+\begin{equation}
+  u = \left\{ \begin{array}{cc} u |_{\omega} & \forall \mathbf{X} \in \omega \\ u |_{\partial \omega} & \forall \mathbf{X} \in \partial \omega \end{array} \right. ,
+\end{equation}
+where the trace of $u |_{\omega}$ evaluated on $\partial \omega$ is not necessarily the same as $u |_{\partial \omega}$.
+The weak gradient $\nabla_w u |_{\omega} \in \mathcal{V} (\omega)$ of $u$ defined on $\omega$ satisfies the following variational equality:
+\begin{equation}
+  \int_{\omega} \nabla_w u |_{\omega} \cdot \mathbf{v} \, dV = - \int_{\omega} u |_{\omega} (\nabla \cdot \mathbf{v}) \, dV + \int_{\partial \omega} u |_{\partial \omega} (\mathbf{v} \cdot \mathbf{N}) \, dA \qquad \forall \mathbf{v} \in \mathcal{V} (\omega).
+\end{equation}
+
+For simplicity, let it be assumed that the weak gradient $\nabla_{w} u |_{\omega} \in \mathbb{R}^3$ is defined to be constant over $\omega$, such that
+\begin{equation}
+  \nabla_{w} u |_{\omega} = \frac{1}{|\omega|} \int_{\partial \omega} u |_{\partial \omega} \, \mathbf{N} \, dA,
+\end{equation}
+where $|\omega| \equiv \int_{\omega} dV$. Moreover, let $u |_{\omega} \in \mathbb{R}$ be assumed constant over $\omega$, such that
+\begin{equation}
+	u |_{\omega} = \frac{1}{3 | \omega |} \int_{\partial \omega} u |_{\partial \omega} \, (\mathbf{X}' \cdot \mathbf{N}) \, dA,
+\end{equation}
+where $\mathbf{X}' \equiv \mathbf{X} - \bar{\mathbf{X}}$, and $\bar{\mathbf{X}} \equiv \frac{1}{|\omega|} \int_{\omega} \mathbf{X} \, dV$. Consequently, both the average value and (weak) gradient of $u$ are explicitly defined (via linear operators) in terms of the boundary values $u |_{\partial \omega}$. Moreover, these relations establish local integration consistency over each cell $\omega$, which by extension guarantees integration consistency over the element $\Omega$ as a whole, assuming that any boundary integrals over the exterior of the element are carried out sufficiently accurately, given a particular choice for the discrete representation of $u |_{\partial \omega}$.
+
+Recursively, let it be supposed that $u |_{\partial \omega}$ is defined independently on each polygonal cell facet $\sigma \subset \partial \omega$ and its boundary $\partial \sigma$ which consists of a collection of linear segments $\gamma \subset \partial \sigma$, such that
+\begin{equation}
+  u |_{\partial \omega} = \left\{ \begin{array}{cc} u |_{\sigma} & \forall \mathbf{X} \in \sigma \\ u |_{\partial \sigma} & \forall \mathbf{X} \in \partial \sigma \end{array} \right. ,
+\end{equation}
+where again, the trace of $u |_{\sigma}$ evaluated on $\partial \sigma$ is not necessarily the same as $u |_{\partial \sigma}$.
+
+Following similar arguments, the average value $u |_{\sigma} \in \mathbb{R}$ and weak in-plane gradient $\nabla_w u |_{\sigma} \in \mathbb{R}^3$ defined on $\sigma$ are given by
+\begin{equation}
+  \nabla_{w} u |_{\sigma} = \frac{1}{|\sigma|} \left[ \int_{\partial \sigma} u |_{\partial \sigma} \, \boldsymbol{\lambda} \, dS \right] \times \mathbf{N},
+\end{equation}
+where $|\sigma| \equiv \int_{\sigma} dA$, and
+\begin{equation}
+	u |_{\sigma} = \frac{1}{2 | \sigma |} \left[ \int_{\partial \sigma} u |_{\partial \sigma} \, ( \mathbf{X}' \times \boldsymbol{\lambda} ) \, dS \right] \cdot \mathbf{N},
+\end{equation}
+where $\mathbf{X}' \equiv \mathbf{X} - \bar{\mathbf{X}}$, and $\bar{\mathbf{X}} \equiv \frac{1}{|\sigma|} \int_{\sigma} \mathbf{X} \, dA$. It follows that for a given facet $\sigma$ with normal $\mathbf{N}$ defined in the reference configuration of the element (prior to deformation by the mapping $\mathbf{x} = \chi (\mathbf{X},t)$, the transformed surface area element is characterized by Nanson's relation:
+\begin{equation}
+	\mathbf{n} \, da = \text{cof} \left( \nabla_w \mathbf{x} |_{\sigma} \right) \cdot \mathbf{N} \, dA,
+\end{equation}
+where the matrix cofactor $\text{cof} \left( \mathbf{A} \right)$ can be safely evaluated for any (possibly rank deficient) $3\times3$ matrix $\mathbf{A}$ via the following formula:
+\begin{equation}
+	\text{cof} \left( \mathbf{A} \right)_{ij} = \frac{1}{2} \varepsilon_{mni} \varepsilon_{pqj} A_{pm} A_{qn} .
+\end{equation}
+The above formula should always be used, as $\nabla_w \mathbf{x} |_{\sigma}$ may become indefinite.
+
+Finally, assume that for each linear segment $\gamma \subset \partial \sigma$ whose endpoints consist of the two vertices $\left\{ v_1, v_2 \right\} = \partial \gamma$, the assumed constant weak gradient $\nabla_w u |_{\gamma}$ and constant average value $u |_{\gamma}$ are given by
+\begin{equation}
+  \nabla_{w} u |_{\gamma} = \frac{1}{|\gamma|} (u |_{v_2} - u |_{v_1}) \boldsymbol{\lambda} |_{\gamma},
+\end{equation}
+where $|\gamma| \equiv \int_{\gamma} dS = || \mathbf{X} |_{v_2} - \mathbf{X} |_{v_1} ||_2$, and
+\begin{equation}
+	u |_{\gamma} = \frac{1}{| \gamma |} (u |_{v_2} \mathbf{X}' |_{v_2} - u |_{v_1} \mathbf{X}' |_{v_1}) \cdot \boldsymbol{\lambda} |_{\gamma},
+\end{equation}
+where $\mathbf{X}' \equiv \mathbf{X} - \bar{\mathbf{X}}$, $\bar{\mathbf{X}} \equiv \frac{1}{|\gamma|} \int_{\gamma} \mathbf{X} \, dS = \frac{1}{2} (\mathbf{X} |_{v_1} + \mathbf{X} |_{v_2})$, and $\boldsymbol{\lambda} |_{\gamma} = \frac{1}{| \gamma |} (\mathbf{X} |_{v_2} - \mathbf{X} |_{v_1})$.
+
+\section{Integration consistency}
+
+
+
+\section{Stability}
+
+
+
+\end{document}
